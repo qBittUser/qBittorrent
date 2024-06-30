@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        libt_version: ["RC_1_2"]
+        libt_version: ["RC_2_0"]
 
     env:
       boost_path: "${{ github.workspace }}/../boost"
@@ -95,7 +95,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.7.2"
+          version: "6.*"
           archives: qtbase qtsvg qttools
           cache: true
 
