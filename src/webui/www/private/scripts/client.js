@@ -119,6 +119,7 @@ let queueing_enabled = true;
 let serverSyncMainDataInterval = 1500;
 let customSyncMainDataInterval = null;
 let useSubcategories = true;
+const useAutoHideZeroStatusFilters = LocalPreferences.get("hide_zero_status_filters", "false") === "true";
 
 /* Categories filter */
 const CATEGORIES_ALL = 1;
@@ -164,7 +165,7 @@ window.addEventListener("DOMContentLoaded", () => {
         LocalPreferences.set("properties_height_rel", properties_height_rel);
     };
 
-    window.addEvent("resize", () => {
+    window.addEventListener("resize", () => {
         // only save sizes if the columns are visible
         if (!$("mainColumn").hasClass("invisible"))
             saveColumnSizes.delay(200); // Resizing might takes some time.
@@ -431,7 +432,14 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     const updateFilter = function(filter, filterTitle) {
-        $(filter + "_filter").firstChild.childNodes[1].nodeValue = filterTitle.replace("%1", torrentsTable.getFilteredTorrentsNumber(filter, CATEGORIES_ALL, TAGS_ALL, TRACKERS_ALL));
+        const filterEl = document.getElementById(`${filter}_filter`);
+        const filterTorrentCount = torrentsTable.getFilteredTorrentsNumber(filter, CATEGORIES_ALL, TAGS_ALL, TRACKERS_ALL);
+        if (useAutoHideZeroStatusFilters) {
+            const hideFilter = (filterTorrentCount === 0) && (filter !== "all");
+            if (filterEl.classList.toggle("invisible", hideFilter))
+                return;
+        }
+        filterEl.firstElementChild.lastChild.nodeValue = filterTitle.replace("%1", filterTorrentCount);
     };
 
     const updateFiltersList = function() {
@@ -845,7 +853,6 @@ window.addEventListener("DOMContentLoaded", () => {
                         });
                     }
                     torrentsTable.updateTable(full_update);
-                    torrentsTable.altRow();
                     if (response["server_state"]) {
                         const tmp = response["server_state"];
                         for (const k in tmp) {
@@ -1001,7 +1008,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    $("alternativeSpeedLimits").addEvent("click", () => {
+    $("alternativeSpeedLimits").addEventListener("click", () => {
         // Change icon immediately to give some feedback
         updateAltSpeedIcon(!alternativeSpeedLimits);
 
@@ -1019,10 +1026,10 @@ window.addEventListener("DOMContentLoaded", () => {
         }).send();
     });
 
-    $("DlInfos").addEvent("click", globalDownloadLimitFN);
-    $("UpInfos").addEvent("click", globalUploadLimitFN);
+    $("DlInfos").addEventListener("click", globalDownloadLimitFN);
+    $("UpInfos").addEventListener("click", globalUploadLimitFN);
 
-    $("showTopToolbarLink").addEvent("click", (e) => {
+    $("showTopToolbarLink").addEventListener("click", (e) => {
         showTopToolbar = !showTopToolbar;
         LocalPreferences.set("show_top_toolbar", showTopToolbar.toString());
         if (showTopToolbar) {
@@ -1036,7 +1043,7 @@ window.addEventListener("DOMContentLoaded", () => {
         MochaUI.Desktop.setDesktopSize();
     });
 
-    $("showStatusBarLink").addEvent("click", (e) => {
+    $("showStatusBarLink").addEventListener("click", (e) => {
         showStatusBar = !showStatusBar;
         LocalPreferences.set("show_status_bar", showStatusBar.toString());
         if (showStatusBar) {
@@ -1070,11 +1077,11 @@ window.addEventListener("DOMContentLoaded", () => {
         navigator.registerProtocolHandler("magnet", templateUrl,
             "qBittorrent WebUI magnet handler");
     };
-    $("registerMagnetHandlerLink").addEvent("click", (e) => {
+    $("registerMagnetHandlerLink").addEventListener("click", (e) => {
         registerMagnetHandler();
     });
 
-    $("showFiltersSidebarLink").addEvent("click", (e) => {
+    $("showFiltersSidebarLink").addEventListener("click", (e) => {
         showFiltersSidebar = !showFiltersSidebar;
         LocalPreferences.set("show_filters_sidebar", showFiltersSidebar.toString());
         if (showFiltersSidebar) {
@@ -1090,7 +1097,7 @@ window.addEventListener("DOMContentLoaded", () => {
         MochaUI.Desktop.setDesktopSize();
     });
 
-    $("speedInBrowserTitleBarLink").addEvent("click", (e) => {
+    $("speedInBrowserTitleBarLink").addEventListener("click", (e) => {
         speedInTitle = !speedInTitle;
         LocalPreferences.set("speed_in_browser_title_bar", speedInTitle.toString());
         if (speedInTitle)
@@ -1100,19 +1107,19 @@ window.addEventListener("DOMContentLoaded", () => {
         processServerState();
     });
 
-    $("showSearchEngineLink").addEvent("click", (e) => {
+    $("showSearchEngineLink").addEventListener("click", (e) => {
         window.qBittorrent.Client.showSearchEngine(!window.qBittorrent.Client.isShowSearchEngine());
         LocalPreferences.set("show_search_engine", window.qBittorrent.Client.isShowSearchEngine().toString());
         updateTabDisplay();
     });
 
-    $("showRssReaderLink").addEvent("click", (e) => {
+    $("showRssReaderLink").addEventListener("click", (e) => {
         window.qBittorrent.Client.showRssReader(!window.qBittorrent.Client.isShowRssReader());
         LocalPreferences.set("show_rss_reader", window.qBittorrent.Client.isShowRssReader().toString());
         updateTabDisplay();
     });
 
-    $("showLogViewerLink").addEvent("click", (e) => {
+    $("showLogViewerLink").addEventListener("click", (e) => {
         window.qBittorrent.Client.showLogViewer(!window.qBittorrent.Client.isShowLogViewer());
         LocalPreferences.set("show_log_viewer", window.qBittorrent.Client.isShowLogViewer().toString());
         updateTabDisplay();
@@ -1166,7 +1173,7 @@ window.addEventListener("DOMContentLoaded", () => {
             $("mainWindowTabs").addClass("invisible");
     };
 
-    $("StatisticsLink").addEvent("click", StatisticsLinkFN);
+    $("StatisticsLink").addEventListener("click", StatisticsLinkFN);
 
     // main window tabs
 
@@ -1365,11 +1372,11 @@ window.addEventListener("DOMContentLoaded", () => {
             tabsOnload: function() {
                 MochaUI.initializeTabs("panelTabs");
 
-                $("logMessageLink").addEvent("click", (e) => {
+                $("logMessageLink").addEventListener("click", (e) => {
                     window.qBittorrent.Log.setCurrentTab("main");
                 });
 
-                $("logPeerLink").addEvent("click", (e) => {
+                $("logPeerLink").addEventListener("click", (e) => {
                     window.qBittorrent.Log.setCurrentTab("peer");
                 });
             },
@@ -1459,7 +1466,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
             };
 
-            $("PropGeneralLink").addEvent("click", function(e) {
+            $("PropGeneralLink").addEventListener("click", function(e) {
                 $$(".propertiesTabContent").addClass("invisible");
                 $("prop_general").removeClass("invisible");
                 hideFilesFilter();
@@ -1467,7 +1474,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 LocalPreferences.set("selected_tab", this.id);
             });
 
-            $("PropTrackersLink").addEvent("click", function(e) {
+            $("PropTrackersLink").addEventListener("click", function(e) {
                 $$(".propertiesTabContent").addClass("invisible");
                 $("prop_trackers").removeClass("invisible");
                 hideFilesFilter();
@@ -1475,7 +1482,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 LocalPreferences.set("selected_tab", this.id);
             });
 
-            $("PropPeersLink").addEvent("click", function(e) {
+            $("PropPeersLink").addEventListener("click", function(e) {
                 $$(".propertiesTabContent").addClass("invisible");
                 $("prop_peers").removeClass("invisible");
                 hideFilesFilter();
@@ -1483,7 +1490,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 LocalPreferences.set("selected_tab", this.id);
             });
 
-            $("PropWebSeedsLink").addEvent("click", function(e) {
+            $("PropWebSeedsLink").addEventListener("click", function(e) {
                 $$(".propertiesTabContent").addClass("invisible");
                 $("prop_webseeds").removeClass("invisible");
                 hideFilesFilter();
@@ -1491,7 +1498,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 LocalPreferences.set("selected_tab", this.id);
             });
 
-            $("PropFilesLink").addEvent("click", function(e) {
+            $("PropFilesLink").addEventListener("click", function(e) {
                 $$(".propertiesTabContent").addClass("invisible");
                 $("prop_files").removeClass("invisible");
                 showFilesFilter();
@@ -1499,7 +1506,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 LocalPreferences.set("selected_tab", this.id);
             });
 
-            $("propertiesPanel_collapseToggle").addEvent("click", (e) => {
+            $("propertiesPanel_collapseToggle").addEventListener("click", (e) => {
                 updatePropertiesPanel();
             });
         },
@@ -1517,21 +1524,21 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // listen for changes to torrentsFilterInput
     let torrentsFilterInputTimer = -1;
-    $("torrentsFilterInput").addEvent("input", () => {
+    $("torrentsFilterInput").addEventListener("input", () => {
         clearTimeout(torrentsFilterInputTimer);
         torrentsFilterInputTimer = setTimeout(() => {
             torrentsFilterInputTimer = -1;
             torrentsTable.updateTable();
         }, window.qBittorrent.Misc.FILTER_INPUT_DELAY);
     });
-    $("torrentsFilterRegexBox").addEvent("change", () => {
+    $("torrentsFilterRegexBox").addEventListener("change", () => {
         torrentsTable.updateTable();
     });
 
-    $("transfersTabLink").addEvent("click", showTransfersTab);
-    $("searchTabLink").addEvent("click", showSearchTab);
-    $("rssTabLink").addEvent("click", showRssTab);
-    $("logTabLink").addEvent("click", showLogTab);
+    $("transfersTabLink").addEventListener("click", showTransfersTab);
+    $("searchTabLink").addEventListener("click", showSearchTab);
+    $("rssTabLink").addEventListener("click", showRssTab);
+    $("logTabLink").addEventListener("click", showLogTab);
     updateTabDisplay();
 
     const registerDragAndDrop = () => {

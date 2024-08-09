@@ -112,8 +112,8 @@ window.qBittorrent.ContextMenu ??= (() => {
             });
 
             // position the menu
-            let xPosMenu = e.page.x + this.options.offsets.x;
-            let yPosMenu = e.page.y + this.options.offsets.y;
+            let xPosMenu = e.pageX + this.options.offsets.x;
+            let yPosMenu = e.pageY + this.options.offsets.y;
             if ((xPosMenu + this.menu.offsetWidth) > document.documentElement.clientWidth)
                 xPosMenu -= this.menu.offsetWidth;
             if ((yPosMenu + this.menu.offsetHeight) > document.documentElement.clientHeight)
@@ -156,19 +156,19 @@ window.qBittorrent.ContextMenu ??= (() => {
         },
 
         setupEventListeners: function(elem) {
-            elem.addEvent("contextmenu", (e) => {
+            elem.addEventListener("contextmenu", (e) => {
                 this.triggerMenu(e, elem);
             });
-            elem.addEvent("click", (e) => {
+            elem.addEventListener("click", (e) => {
                 this.hide();
             });
 
-            elem.addEvent("touchstart", (e) => {
+            elem.addEventListener("touchstart", (e) => {
                 this.hide();
                 this.touchStartAt = performance.now();
                 this.touchStartEvent = e;
             });
-            elem.addEvent("touchend", (e) => {
+            elem.addEventListener("touchend", (e) => {
                 const now = performance.now();
                 const touchStartAt = this.touchStartAt;
                 const touchStartEvent = this.touchStartEvent;
@@ -196,8 +196,10 @@ window.qBittorrent.ContextMenu ??= (() => {
                 return;
 
             // prevent default, if told to
-            if (this.options.stopEvent)
-                e.stop();
+            if (this.options.stopEvent) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             // record this as the trigger
             this.options.element = $(el);
             this.adjustMenuPosition(e);
@@ -214,7 +216,7 @@ window.qBittorrent.ContextMenu ??= (() => {
 
             /* menu items */
             this.menu.getElements("a").each(function(item) {
-                item.addEvent("click", (e) => {
+                item.addEventListener("click", (e) => {
                     e.preventDefault();
                     if (!item.hasClass("disabled")) {
                         this.execute(item.href.split("#")[1], $(this.options.element));
@@ -224,7 +226,7 @@ window.qBittorrent.ContextMenu ??= (() => {
             }, this);
 
             // hide on body click
-            $(document.body).addEvent("click", () => {
+            $(document.body).addEventListener("click", () => {
                 this.hide();
             });
         },
@@ -310,6 +312,7 @@ window.qBittorrent.ContextMenu ??= (() => {
             let all_are_auto_tmm = true;
             let there_are_auto_tmm = false;
             const tagCount = new Map();
+            const categoryCount = new Map();
 
             const selectedRows = torrentsTable.selectedRowsIds();
             selectedRows.forEach((item, index) => {
@@ -350,6 +353,10 @@ window.qBittorrent.ContextMenu ??= (() => {
                     const count = tagCount.get(tag);
                     tagCount.set(tag, ((count !== undefined) ? (count + 1) : 1));
                 }
+
+                const torrentCategory = data["category"];
+                const count = categoryCount.get(torrentCategory);
+                categoryCount.set(torrentCategory, ((count !== undefined) ? (count + 1) : 1));
             });
 
             // hide renameFiles when more than 1 torrent is selected
@@ -428,16 +435,24 @@ window.qBittorrent.ContextMenu ??= (() => {
                 checkbox.indeterminate = (hasCount ? isLesser : false);
                 checkbox.checked = (hasCount ? !isLesser : false);
             });
+
+            const contextCategoryList = document.getElementById("contextCategoryList");
+            category_list.forEach((category, categoryHash) => {
+                const categoryIcon = contextCategoryList.querySelector(`a[href$="(${categoryHash});"] img`);
+                const count = categoryCount.get(category.name);
+                const isEqual = ((count !== undefined) && (count === selectedRows.length));
+                categoryIcon.classList.toggle("highlightedCategoryIcon", isEqual);
+            });
         },
 
         updateCategoriesSubMenu: function(categoryList) {
             const contextCategoryList = $("contextCategoryList");
             contextCategoryList.getChildren().each(c => c.destroy());
             contextCategoryList.appendChild(new Element("li", {
-                html: '<a href="javascript:torrentNewCategoryFN();"><img src="images/list-add.svg" alt="QBT_TR(New...)QBT_TR[CONTEXT=TransferListWidget]"/> QBT_TR(New...)QBT_TR[CONTEXT=TransferListWidget]</a>'
+                html: '<a href="javascript:torrentNewCategoryFN();"><img src="images/list-add.svg" alt="QBT_TR(New...)QBT_TR[CONTEXT=TransferListWidget]"/>QBT_TR(New...)QBT_TR[CONTEXT=TransferListWidget]</a>'
             }));
             contextCategoryList.appendChild(new Element("li", {
-                html: '<a href="javascript:torrentSetCategoryFN(0);"><img src="images/edit-clear.svg" alt="QBT_TR(Reset)QBT_TR[CONTEXT=TransferListWidget]"/> QBT_TR(Reset)QBT_TR[CONTEXT=TransferListWidget]</a>'
+                html: '<a href="javascript:torrentSetCategoryFN(0);"><img src="images/edit-clear.svg" alt="QBT_TR(Reset)QBT_TR[CONTEXT=TransferListWidget]"/>QBT_TR(Reset)QBT_TR[CONTEXT=TransferListWidget]</a>'
             }));
 
             const sortedCategories = [];
@@ -634,8 +649,8 @@ window.qBittorrent.ContextMenu ??= (() => {
                 top: "-999em"
             });
             // position the menu
-            let xPosMenu = e.page.x + this.options.offsets.x - $("rssdownloaderpage").offsetLeft;
-            let yPosMenu = e.page.y + this.options.offsets.y - $("rssdownloaderpage").offsetTop;
+            let xPosMenu = e.pageX + this.options.offsets.x - $("rssdownloaderpage").offsetLeft;
+            let yPosMenu = e.pageY + this.options.offsets.y - $("rssdownloaderpage").offsetTop;
             if ((xPosMenu + this.menu.offsetWidth) > document.documentElement.clientWidth)
                 xPosMenu -= this.menu.offsetWidth;
             if ((yPosMenu + this.menu.offsetHeight) > document.documentElement.clientHeight)

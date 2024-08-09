@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>QBT_TR(Add Tags)QBT_TR[CONTEXT=TransferListWidget]</title>
+    <title>QBT_TR(Add tags)QBT_TR[CONTEXT=TransferListWidget]</title>
     <link rel="stylesheet" href="css/style.css?v=${CACHEID}" type="text/css">
     <script src="scripts/lib/MooTools-Core-1.6.0-compat-compressed.js"></script>
     <script src="scripts/lib/MooTools-More-1.6.0-compat-compressed.js"></script>
@@ -29,7 +29,7 @@
             }
         }).activate();
 
-        window.addEvent("domready", () => {
+        window.addEventListener("DOMContentLoaded", () => {
             const uriAction = window.qBittorrent.Misc.safeTrim(new URI().getData("action"));
             const uriHashes = window.qBittorrent.Misc.safeTrim(new URI().getData("hashes"));
 
@@ -38,8 +38,9 @@
 
             $("tagName").focus();
 
-            $("tagNameButton").addEvent("click", (e) => {
-                new Event(e).stop();
+            $("tagNameButton").addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
                 const tagName = $("tagName").value.trim();
 

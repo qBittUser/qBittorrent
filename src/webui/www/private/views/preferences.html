@@ -1,42 +1,53 @@
 <div id="BehaviorTab" class="PrefTab">
     <fieldset class="settings">
         <legend>QBT_TR(Language)QBT_TR[CONTEXT=OptionsDialog]</legend>
-        <label for="locale_select">QBT_TR(User Interface Language:)QBT_TR[CONTEXT=OptionsDialog]</label>
+        <label for="locale_select">QBT_TR(User interface language:)QBT_TR[CONTEXT=OptionsDialog]</label>
         <select id="locale_select">
             ${LANGUAGE_OPTIONS}
         </select>
     </fieldset>
 
     <fieldset class="settings">
-        <legend>QBT_TR(Action on double-click)QBT_TR[CONTEXT=OptionsDialog]</legend>
-        <table>
-            <tbody>
-                <tr>
-                    <td><label for="dblclickDownloadSelect">QBT_TR(Downloading torrents:)QBT_TR[CONTEXT=OptionsDialog]</label></td>
-                    <td>
-                        <select id="dblclickDownloadSelect">
-                            <option value="1" selected>QBT_TR(Start / Stop Torrent)QBT_TR[CONTEXT=OptionsDialog]</option>
-                            <option value="0">QBT_TR(No action)QBT_TR[CONTEXT=OptionsDialog]</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="dblclickCompleteSelect">QBT_TR(Completed torrents:)QBT_TR[CONTEXT=OptionsDialog]</label></td>
-                    <td>
-                        <select id="dblclickCompleteSelect">
-                            <option value="1" selected>QBT_TR(Start / Stop Torrent)QBT_TR[CONTEXT=OptionsDialog]</option>
-                            <option value="0">QBT_TR(No action)QBT_TR[CONTEXT=OptionsDialog]</option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <legend>QBT_TR(Transfer list)QBT_TR[CONTEXT=OptionsDialog]</legend>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="useAltRowColorsInput">
+            <label for="useAltRowColorsInput">QBT_TR(Use alternating row colors)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
+        <fieldset class="settings">
+            <legend>QBT_TR(Action on double-click)QBT_TR[CONTEXT=OptionsDialog]</legend>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><label for="dblclickDownloadSelect">QBT_TR(Downloading torrents:)QBT_TR[CONTEXT=OptionsDialog]</label></td>
+                        <td>
+                            <select id="dblclickDownloadSelect">
+                                <option value="1" selected>QBT_TR(Start / stop torrent)QBT_TR[CONTEXT=OptionsDialog]</option>
+                                <option value="0">QBT_TR(No action)QBT_TR[CONTEXT=OptionsDialog]</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="dblclickCompleteSelect">QBT_TR(Completed torrents:)QBT_TR[CONTEXT=OptionsDialog]</label></td>
+                        <td>
+                            <select id="dblclickCompleteSelect">
+                                <option value="1" selected>QBT_TR(Start / stop torrent)QBT_TR[CONTEXT=OptionsDialog]</option>
+                                <option value="0">QBT_TR(No action)QBT_TR[CONTEXT=OptionsDialog]</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
+        <div class="formRow" style="margin-bottom: 3px;">
+            <input type="checkbox" id="hideZeroFiltersCheckbox">
+            <label for="hideZeroFiltersCheckbox">QBT_TR(Auto hide zero status filters)QBT_TR[CONTEXT=OptionsDialog]</label>
+        </div>
     </fieldset>
 
     <fieldset class="settings">
         <legend>
             <input type="checkbox" id="filelog_checkbox" onclick="qBittorrent.Preferences.updateFileLogEnabled();">
-            <label for="filelog_checkbox">QBT_TR(Log file)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <label for="filelog_checkbox">QBT_TR(Log Files)QBT_TR[CONTEXT=OptionsDialog]</label>
         </legend>
         <div class="formRow">
             <label for="filelog_save_path_input">QBT_TR(Save path:)QBT_TR[CONTEXT=OptionsDialog]</label>
@@ -310,12 +321,12 @@
         </legend>
         <div class="formRow">
             <input type="checkbox" id="autorunOnTorrentAddedCheckbox" onclick="qBittorrent.Preferences.updateAutoRunOnTorrentAdded();">
-            <label id="autorunOnTorrentAddedLabel" for="autorunOnTorrentAddedCheckbox">QBT_TR(Run external program on torrent added)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <label id="autorunOnTorrentAddedLabel" for="autorunOnTorrentAddedCheckbox">QBT_TR(Run on torrent added:)QBT_TR[CONTEXT=OptionsDialog]</label>
             <input type="text" id="autorunOnTorrentAddedProgram" aria-labelledby="autorunOnTorrentAddedLabel" style="width: 400px;">
         </div>
         <div class="formRow">
             <input type="checkbox" id="autorun_checkbox" onclick="qBittorrent.Preferences.updateAutoRun();">
-            <label id="autorunLabel" for="autorun_checkbox">QBT_TR(Run external program on torrent finished)QBT_TR[CONTEXT=OptionsDialog]</label>
+            <label id="autorunLabel" for="autorun_checkbox">QBT_TR(Run on torrent finished:)QBT_TR[CONTEXT=OptionsDialog]</label>
             <input type="text" id="autorunProg_txt" aria-labelledby="autorunLabel" style="width: 400px;">
         </div>
         <div style="font-style: italic;">QBT_TR(Supported parameters (case sensitive):)QBT_TR[CONTEXT=OptionsDialog]
@@ -2068,8 +2079,10 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             window.parent.qBittorrent.Cache.preferences.init({
                 onSuccess: (pref) => {
                     // Behavior tab
+                    document.getElementById("hideZeroFiltersCheckbox").checked = (LocalPreferences.get("hide_zero_status_filters", "false") === "true");
                     $("dblclickDownloadSelect").value = LocalPreferences.get("dblclick_download", "1");
                     $("dblclickCompleteSelect").value = LocalPreferences.get("dblclick_complete", "1");
+                    document.getElementById("useAltRowColorsInput").checked = (LocalPreferences.get("use_alt_row_colors", "true") === "true");
                     $("filelog_checkbox").checked = pref.file_log_enabled;
                     $("filelog_save_path_input").value = pref.file_log_path;
                     $("filelog_backup_checkbox").checked = pref.file_log_backup_enabled;
@@ -2478,8 +2491,10 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             // Validate form data
 
             // Behavior tab
+            LocalPreferences.set("hide_zero_status_filters", document.getElementById("hideZeroFiltersCheckbox").checked.toString());
             LocalPreferences.set("dblclick_download", $("dblclickDownloadSelect").value);
             LocalPreferences.set("dblclick_complete", $("dblclickCompleteSelect").value);
+            LocalPreferences.set("use_alt_row_colors", document.getElementById("useAltRowColorsInput").checked.toString());
             settings["file_log_enabled"] = $("filelog_checkbox").checked;
             settings["file_log_path"] = $("filelog_save_path_input").value;
             settings["file_log_backup_enabled"] = $("filelog_backup_checkbox").checked;
@@ -2966,7 +2981,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
             if ((buildInfo.platform !== "macos") && (buildInfo.platform !== "windows"))
                 $("rowMarkOfTheWeb").style.display = "none";
 
-            $("networkInterface").addEvent("change", function() {
+            $("networkInterface").addEventListener("change", function() {
                 updateInterfaceAddresses($(this).value, "");
             });
 
