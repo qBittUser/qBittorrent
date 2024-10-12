@@ -641,12 +641,6 @@ window.addEventListener("DOMContentLoaded", () => {
         trackerFilterList.appendChild(createLink(TRACKERS_ALL, "QBT_TR(All (%1))QBT_TR[CONTEXT=TrackerFiltersList]", torrentsTable.getRowSize()));
         trackerFilterList.appendChild(createLink(TRACKERS_TRACKERLESS, "QBT_TR(Trackerless (%1))QBT_TR[CONTEXT=TrackerFiltersList]", trackerlessTorrentsCount));
 
-        // Remove unused trackers
-        for (const [key, { trackerTorrentMap }] of trackerList) {
-            if (trackerTorrentMap.size === 0)
-                trackerList.delete(key);
-        }
-
         // Sort trackers by hostname
         const sortedList = [];
         trackerList.forEach(({ host, trackerTorrentMap }, hash) => {
@@ -677,36 +671,6 @@ window.addEventListener("DOMContentLoaded", () => {
         for (const tracker of trackerFilterList.children)
             tracker.classList.toggle("selectedFilter", (Number(tracker.id) === selectedTracker));
     };
-
-    const setupCopyEventHandler = (function() {
-        let clipboardEvent;
-
-        return () => {
-            if (clipboardEvent)
-                clipboardEvent.destroy();
-
-            clipboardEvent = new ClipboardJS(".copyToClipboard", {
-                text: function(trigger) {
-                    switch (trigger.id) {
-                        case "copyName":
-                            return copyNameFN();
-                        case "copyInfohash1":
-                            return copyInfohashFN(1);
-                        case "copyInfohash2":
-                            return copyInfohashFN(2);
-                        case "copyMagnetLink":
-                            return copyMagnetLinkFN();
-                        case "copyID":
-                            return copyIdFN();
-                        case "copyComment":
-                            return copyCommentFN();
-                        default:
-                            return "";
-                    }
-                }
-            });
-        };
-    })();
 
     let syncMainDataTimeoutID = -1;
     let syncRequestInProgress = false;
@@ -815,13 +779,21 @@ window.addEventListener("DOMContentLoaded", () => {
                             const host = window.qBittorrent.Misc.getHost(tracker);
                             const hash = window.qBittorrent.Misc.genHash(host);
                             const trackerListEntry = trackerList.get(hash);
-                            if (trackerListEntry)
+                            if (trackerListEntry) {
                                 trackerListEntry.trackerTorrentMap.delete(tracker);
+                                // Remove unused trackers
+                                if (trackerListEntry.trackerTorrentMap.size === 0) {
+                                    trackerList.delete(hash);
+                                    if (selectedTracker === hash) {
+                                        selectedTracker = TRACKERS_ALL;
+                                        LocalPreferences.set("selected_tracker", selectedTracker.toString());
+                                    }
+                                }
+                            }
                         }
                         updateTrackers = true;
                     }
                     if (response["torrents"]) {
-                        let updateTorrentList = false;
                         for (const key in response["torrents"]) {
                             if (!Object.hasOwn(response["torrents"], key))
                                 continue;
@@ -835,12 +807,7 @@ window.addEventListener("DOMContentLoaded", () => {
                                 update_categories = true;
                             if (addTorrentToTagList(response["torrents"][key]))
                                 updateTags = true;
-                            if (response["torrents"][key]["name"])
-                                updateTorrentList = true;
                         }
-
-                        if (updateTorrentList)
-                            setupCopyEventHandler();
                     }
                     if (response["torrents_removed"]) {
                         response["torrents_removed"].each((hash) => {
@@ -1647,7 +1614,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     return;
                 if (event.target.isContentEditable)
                     return;
-                deleteFN();
+                deleteSelectedTorrentsFN();
                 event.preventDefault();
             },
             "shift+delete": (event) => {
@@ -1655,11 +1622,32 @@ window.addEventListener("DOMContentLoaded", () => {
                     return;
                 if (event.target.isContentEditable)
                     return;
-                deleteFN(true);
+                deleteSelectedTorrentsFN(true);
                 event.preventDefault();
             }
         }
     }).activate();
+
+    new ClipboardJS(".copyToClipboard", {
+        text: function(trigger) {
+            switch (trigger.id) {
+                case "copyName":
+                    return copyNameFN();
+                case "copyInfohash1":
+                    return copyInfohashFN(1);
+                case "copyInfohash2":
+                    return copyInfohashFN(2);
+                case "copyMagnetLink":
+                    return copyMagnetLinkFN();
+                case "copyID":
+                    return copyIdFN();
+                case "copyComment":
+                    return copyCommentFN();
+                default:
+                    return "";
+            }
+        }
+    });
 });
 
 window.addEventListener("load", () => {

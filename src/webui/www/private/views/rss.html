@@ -73,7 +73,7 @@
     }
 
     #rssButtonBar button {
-        padding: 4px 6px;
+        padding: 3px 6px;
     }
 
     #rssButtonBar button img {
@@ -256,8 +256,8 @@
                     updateAll: refreshAllFeeds
                 },
                 offsets: {
-                    x: -16,
-                    y: -57
+                    x: 0,
+                    y: -60
                 }
             });
 
@@ -304,8 +304,8 @@
                     }
                 },
                 offsets: {
-                    x: -16,
-                    y: -57
+                    x: 0,
+                    y: -60
                 }
             });
             rssArticleTable.setup("rssArticleTableDiv", "rssArticleFixedHeaderDiv", rssArticleContextMenu);
@@ -503,9 +503,15 @@
                     if ((rssFeedRows.length - 1) === flattenedResp.length) {
                         match = true;
                         for (let i = 0; i < flattenedResp.length; ++i) {
-                            if (((flattenedResp[i].uid ? flattenedResp[i].uid : "") !== rssFeedRows[i + 1].full_data.dataUid)
-                                || (flattenedResp[i].fullName !== rssFeedRows[i + 1].full_data.dataPath)
-                                || (flattenedResp[i].url !== rssFeedRows[i + 1].full_data.dataUrl)) {
+                            const newData = flattenedResp[i];
+                            const existingData = rssFeedRows[i + 1].full_data;
+
+                            if (newData.fullName !== existingData.dataPath) {
+                                match = false;
+                                break;
+                            }
+                            // only non-folders have these properties
+                            if (!newData.isFolder && ((newData.uid !== existingData.dataUid) || (newData.url !== existingData.dataUrl))) {
                                 match = false;
                                 break;
                             }

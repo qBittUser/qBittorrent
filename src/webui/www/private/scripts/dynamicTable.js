@@ -367,7 +367,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                 actions: actions,
                 menu: menuId,
                 offsets: {
-                    x: -15,
+                    x: 0,
                     y: 2
                 }
             });
@@ -1525,9 +1525,20 @@ window.qBittorrent.DynamicTable ??= (() => {
 
         getFilteredTorrentsHashes: function(filterName, categoryHash, tagHash, trackerHash) {
             const rowsHashes = [];
+            const useRegex = document.getElementById("torrentsFilterRegexBox").checked;
+            const filterText = document.getElementById("torrentsFilterInput").value.trim().toLowerCase();
+            let filterTerms;
+            try {
+                filterTerms = (filterText.length > 0)
+                    ? (useRegex ? new RegExp(filterText) : filterText.split(" "))
+                    : null;
+            }
+            catch (e) { // SyntaxError: Invalid regex pattern
+                return filteredRows;
+            }
 
             for (const row of this.rows.values()) {
-                if (this.applyFilter(row, filterName, categoryHash, tagHash, trackerHash, null))
+                if (this.applyFilter(row, filterName, categoryHash, tagHash, trackerHash, filterTerms))
                     rowsHashes.push(row["rowId"]);
             }
 
@@ -2098,7 +2109,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                         const dirImg = new Element("img", {
                             src: "images/directory.svg",
                             styles: {
-                                "width": 15,
+                                "width": 20,
                                 "padding-right": 5,
                                 "margin-bottom": -3,
                                 "margin-left": (node.depth * 20)
@@ -2431,7 +2442,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                         const dirImg = new Element("img", {
                             src: "images/directory.svg",
                             styles: {
-                                "width": 15,
+                                "width": 20,
                                 "padding-right": 5,
                                 "margin-bottom": -3
                             },
