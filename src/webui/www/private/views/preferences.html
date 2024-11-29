@@ -2138,7 +2138,7 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 languages.push($("locale_select").options[i].value);
 
             if (!languages.includes(selected)) {
-                const lang = selected.slice(0, selected.indexOf("_"));
+                const lang = selected.split("_", 1)[0];
                 selected = languages.includes(lang) ? lang : "en";
             }
             $("locale_select").value = selected;
@@ -3043,12 +3043,12 @@ Use ';' to split multiple entries. Can use wildcard '*'.)QBT_TR[CONTEXT=OptionsD
                 data: settings,
                 onFailure: () => {
                     alert("QBT_TR(Unable to save program preferences, qBittorrent is probably unreachable.)QBT_TR[CONTEXT=HttpServer]");
-                    window.parent.qBittorrent.Client.closeWindow("preferencesPage");
+                    window.parent.qBittorrent.Client.closeWindow(document.getElementById("preferencesPage"));
                 },
                 onSuccess: () => {
                     // Close window
                     window.parent.location.reload();
-                    window.parent.qBittorrent.Client.closeWindow("preferencesPage");
+                    window.parent.qBittorrent.Client.closeWindow(document.getElementById("preferencesPage"));
                 }
             });
         };
