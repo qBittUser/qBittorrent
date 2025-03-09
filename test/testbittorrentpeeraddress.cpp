@@ -1,6 +1,6 @@
 /*
  * Bittorrent Client using Qt and libtorrent.
- * Copyright (C) 2022  Mike Tzou (Chocobo1)
+ * Copyright (C) 2025  Mike Tzou (Chocobo1)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,43 +29,54 @@
 #include <QObject>
 #include <QTest>
 
+#include "base/bittorrent/peeraddress.h"
 #include "base/global.h"
-#include "base/utils/gzip.h"
 
-class TestUtilsGzip final : public QObject
+namespace
+{
+    const BitTorrent::PeerAddress ipv4 {.ip = QHostAddress(u"127.0.0.1"_s), .port = 8080};
+    const QString ipv4Str = u"127.0.0.1:8080"_s;
+    const BitTorrent::PeerAddress ipv6 {.ip = QHostAddress(u"::1"_s), .port = 8080};
+    const QString ipv6Str = u"[::1]:8080"_s;
+}
+
+class TestBittorrentPeerAddress final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY_MOVE(TestUtilsGzip)
+    Q_DISABLE_COPY_MOVE(TestBittorrentPeerAddress)
 
 public:
-    TestUtilsGzip() = default;
+    TestBittorrentPeerAddress() = default;
 
 private slots:
-    void testCompress() const
+    void testParse() const
     {
-        // compressed data is not reproducible, see: https://stackoverflow.com/questions/30150972/are-there-test-vectors-available-for-gzip
-        const QByteArray data = QByteArrayLiteral("abc");
-
-        bool ok = false;
-        const QByteArray compressedData = Utils::Gzip::compress(data, 6, &ok);
-        QVERIFY(ok);
+        QCOMPARE(BitTorrent::PeerAddress::parse({}), BitTorrent::PeerAddress());
+        QCOMPARE(BitTorrent::PeerAddress::parse(ipv4Str), ipv4);
+        QCOMPARE(BitTorrent::PeerAddress::parse(ipv6Str), ipv6);
     }
 
-    void testDecompress() const
+    void testToString() const
     {
-        const QByteArray data = QByteArrayLiteral("abc");
+        QCOMPARE(BitTorrent::PeerAddress().toString(), QString());
+        QCOMPARE(ipv4.toString(), ipv4Str);
+        QCOMPARE(ipv6.toString(), ipv6Str);
+    }
 
-        bool ok = false;
-        const QByteArray compressedData = Utils::Gzip::compress(data, 6, &ok);
-        QVERIFY(ok);
-        QCOMPARE_NE(compressedData, data);
+    void testOperatorEquality() const
+    {
+        QCOMPARE_EQ(ipv4, ipv4);
+        QVERIFY(!(ipv4 != ipv4));
+        QCOMPARE_EQ(ipv6, ipv6);
+        QVERIFY(!(ipv6 != ipv6));
 
-        ok = false;
-        const QByteArray decompressedData = Utils::Gzip::decompress(compressedData, &ok);
-        QVERIFY(ok);
-        QCOMPARE(decompressedData, data);
+        QCOMPARE_NE(ipv4, ipv6);
+        QCOMPARE_NE(ipv4, (BitTorrent::PeerAddress {.ip = ipv4.ip, .port = 1234}));
+
+        QCOMPARE_NE(ipv6, ipv4);
+        QCOMPARE_NE(ipv6, (BitTorrent::PeerAddress {.ip = ipv6.ip, .port = 1234}));
     }
 };
 
-QTEST_APPLESS_MAIN(TestUtilsGzip)
-#include "testutilsgzip.moc"
+QTEST_APPLESS_MAIN(TestBittorrentPeerAddress)
+#include "testbittorrentpeeraddress.moc"
