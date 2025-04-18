@@ -1,6 +1,6 @@
 /*
  * Bittorrent Client using Qt and libtorrent.
- * Copyright (C) 2021-2025  Vladimir Golovnev <glassez@yandex.ru>
+ * Copyright (C) 2025  Mike Tzou (Chocobo1)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,44 +26,16 @@
  * exception statement from your version.
  */
 
-#pragma once
+#include "keysequence.h"
 
-#include <QReadWriteLock>
+#include <QtSystemDetection>
+#include <QKeySequence>
 
-#include "base/pathfwd.h"
-#include "resumedatastorage.h"
-
-class QSqlQuery;
-
-namespace BitTorrent
+QKeySequence Utils::KeySequence::deleteItem()
 {
-    class DBResumeDataStorage final : public ResumeDataStorage
-    {
-        Q_OBJECT
-        Q_DISABLE_COPY_MOVE(DBResumeDataStorage)
-
-    public:
-        explicit DBResumeDataStorage(const Path &dbPath, QObject *parent = nullptr);
-        ~DBResumeDataStorage() override;
-
-        QList<TorrentID> registeredTorrents() const override;
-        LoadResumeDataResult load(const TorrentID &id) const override;
-
-        void store(const TorrentID &id, const LoadTorrentParams &resumeData) const override;
-        void remove(const TorrentID &id) const override;
-        void storeQueue(const QList<TorrentID> &queue) const override;
-
-    private:
-        void doLoadAll() const override;
-        int currentDBVersion() const;
-        void createDB() const;
-        void updateDB(int fromVersion) const;
-        void enableWALMode() const;
-        LoadResumeDataResult parseQueryResultRow(const QSqlQuery &query) const;
-
-        class Worker;
-        Worker *m_asyncWorker = nullptr;
-
-        mutable QReadWriteLock m_dbLock;
-    };
+#ifdef Q_OS_MACOS
+    return Qt::CTRL | Qt::Key_Backspace;
+#else
+    return QKeySequence::Delete;
+#endif
 }
