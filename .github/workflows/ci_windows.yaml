@@ -11,7 +11,7 @@ concurrency:
 jobs:
   ci:
     name: Build
-    runs-on: windows-latest
+    runs-on: windows-2025
     permissions:
       actions: write
 
@@ -198,14 +198,3 @@ jobs:
         with:
           name: qBittorrent-CI_Windows-x64_libtorrent-${{ matrix.libt_version }}
           path: upload
-
-      - name: Create installer
-        run: |
-          7z x -o"dist/windows/" "dist/windows/NSISPlugins.zip"
-          makensis /DQBT_DIST_DIR="../../upload/qBittorrent" /WX dist/windows/qbittorrent.nsi
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: qBittorrent-CI_Windows-x64_libtorrent-${{ matrix.libt_version }}-setup
-          path: dist/windows/qbittorrent_*_setup.exe
