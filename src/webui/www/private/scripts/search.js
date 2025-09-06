@@ -561,8 +561,8 @@ window.qBittorrent.Search ??= (() => {
 
     const downloadSearchTorrent = () => {
         for (const rowID of searchResultsTable.selectedRowsIds()) {
-            const { fileName, fileUrl } = searchResultsTable.getRow(rowID).full_data;
-            qBittorrent.Client.createAddTorrentWindow(fileName, fileUrl);
+            const { engineName, fileName, fileUrl } = searchResultsTable.getRow(rowID).full_data;
+            qBittorrent.Client.createAddTorrentWindow(fileName, fileUrl, undefined, engineName);
         }
     };
 
@@ -917,6 +917,11 @@ window.qBittorrent.Search ??= (() => {
 
                 clearTimeout(state.loadResultsTimer);
                 state.loadResultsTimer = loadSearchResultsData.delay(2000, this, searchId);
+            }, (error) => {
+                console.error(error);
+
+                clearTimeout(state.loadResultsTimer);
+                state.loadResultsTimer = loadSearchResultsData.delay(3000, this, searchId);
             });
     };
 
