@@ -19,13 +19,9 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.0.11"
+          - version: "RC_2_0"
             boost_major_version: "1"
             boost_minor_version: "90"
-            boost_patch_version: "0"
-          - version: "1.2.20"
-            boost_major_version: "1"
-            boost_minor_version: "86"
             boost_patch_version: "0"
         config:
         - os: windows-latest
@@ -125,7 +121,7 @@ jobs:
       - name: Install libtorrent
         run: |
           git clone `
-            --branch v${{ matrix.libtorrent.version }} `
+            --branch ${{ matrix.libtorrent.version }} `
             --depth 1 `
             --recurse-submodules `
             https://github.com/arvidn/libtorrent.git `
@@ -205,12 +201,6 @@ jobs:
           copy "${{ env.Qt_ROOT_DIR }}/plugins/styles/qmodernwindowsstyle.dll" upload/qBittorrent/plugins/styles
           mkdir upload/qBittorrent/plugins/tls
           copy "${{ env.Qt_ROOT_DIR }}/plugins/tls/qschannelbackend.dll" upload/qBittorrent/plugins/tls
-          # cmake additionals
-          mkdir upload/cmake
-          copy build/compile_commands.json upload/cmake
-          copy build/target_graph.dot upload/cmake
-          mkdir upload/cmake/libtorrent
-          copy ${{ env.libtorrent_path }}/build/compile_commands.json upload/cmake/libtorrent
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
