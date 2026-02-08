@@ -262,9 +262,10 @@ window.qBittorrent.DynamicTable ??= (() => {
 
                     resetElementBorderStyle(borderChangeElement, ((changeBorderSide === "right") ? "left" : "right"));
 
-                    borderChangeElement.getSiblings('[class=""]').each((el) => {
-                        resetElementBorderStyle(el);
-                    });
+                    for (const el of borderChangeElement.parentElement.children) {
+                        if ((el !== borderChangeElement) && (el.classList.length === 0))
+                            resetElementBorderStyle(el);
+                    }
                 }
                 this.lastHoverTh = e.target;
                 this.lastClientX = e.clientX;
@@ -324,9 +325,10 @@ window.qBittorrent.DynamicTable ??= (() => {
                 }
                 if (this.currentHeaderAction === "drag") {
                     resetElementBorderStyle(el);
-                    el.getSiblings('[class=""]').each((el) => {
-                        resetElementBorderStyle(el);
-                    });
+                    for (const e of el.parentElement.children) {
+                        if ((e !== el) && (e.classList.length === 0))
+                            resetElementBorderStyle(e);
+                    }
                 }
                 this.currentHeaderAction = "";
             }.bind(this);
@@ -817,18 +819,21 @@ window.qBittorrent.DynamicTable ??= (() => {
          * Replaces all rows with the provided set.
          * More efficient than calling clear() + updateRowData() because existing <tr>
          * elements are reused.
-         * @param {Object[]} rows - Array of row objects, each with a rowId property
+         * @param {Map} rows - A Map with rowId as key
          */
         setRows(rows) {
-            const newRowIds = new Set();
-            for (const row of rows) {
-                this.updateRowData(row);
-                newRowIds.add(`${row.rowId}`);
+            for (const existingId of this.rows.keys()) {
+                const newVal = rows.get(existingId);
+                if (newVal !== undefined) {
+                    this.updateRowData(newVal);
+                    rows.delete(existingId);
+                }
+                else {
+                    this.rows.delete(existingId);
+                }
             }
-            for (const rowId of this.rows.keys()) {
-                if (!newRowIds.has(rowId))
-                    this.rows.delete(rowId);
-            }
+            for (const data of rows.values())
+                this.updateRowData(data);
         }
 
         getTrs() {
