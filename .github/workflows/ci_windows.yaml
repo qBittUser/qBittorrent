@@ -19,19 +19,19 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.0-rc2"
+          - version: "master"
             boost_major_version: "1"
             boost_minor_version: "91"
             boost_patch_version: "0"
             libt_build_flags: "-Dwebtorrent=ON"
-          - version: "2.0.13"
+          - version: "RC_2_1"
             boost_major_version: "1"
             boost_minor_version: "91"
             boost_patch_version: "0"
             libt_build_flags: ""
-          - version: "1.2.20"
+          - version: "RC_2_0"
             boost_major_version: "1"
-            boost_minor_version: "86"
+            boost_minor_version: "91"
             boost_patch_version: "0"
             libt_build_flags: ""
         config:
@@ -132,7 +132,7 @@ jobs:
       - name: Install libtorrent
         run: |
           git clone `
-            --branch v${{ matrix.libtorrent.version }} `
+            --branch ${{ matrix.libtorrent.version }} `
             --depth 1 `
             --recurse-submodules `
             https://github.com/arvidn/libtorrent.git `
