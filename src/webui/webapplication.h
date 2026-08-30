@@ -58,7 +58,7 @@
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
 
-inline const Utils::Version<3, 2> API_VERSION {2, 16, 1};
+inline const Utils::Version<3, 2> API_VERSION {2, 16, 2};
 
 class QNetworkCookie;
 
@@ -230,6 +230,8 @@ private:
         {{u"torrents"_s, u"toggleSequentialDownload"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"torrents"_s, u"topPrio"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"transfer"_s, u"banPeers"_s}, Http::HEADER_REQUEST_METHOD_POST},
+        {{u"transfer"_s, u"pauseSession"_s}, Http::HEADER_REQUEST_METHOD_POST},
+        {{u"transfer"_s, u"resumeSession"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"transfer"_s, u"setDownloadLimit"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"transfer"_s, u"setSpeedLimits"_s}, Http::HEADER_REQUEST_METHOD_POST},
         {{u"transfer"_s, u"setSpeedLimitsMode"_s}, Http::HEADER_REQUEST_METHOD_POST},
