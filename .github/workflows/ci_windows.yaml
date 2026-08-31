@@ -23,7 +23,7 @@ jobs:
             boost_major_version: "1"
             boost_minor_version: "92"
             boost_patch_version: "0"
-            libt_build_flags: ""
+            libt_build_flags: "-Dwebtorrent=OFF"
         config:
         - os: windows-latest
           arch: x64
