@@ -259,6 +259,8 @@ void AppController::preferencesAction()
     data[u"i2p_outbound_quantity"_s] = session->I2POutboundQuantity();
     data[u"i2p_inbound_length"_s] = session->I2PInboundLength();
     data[u"i2p_outbound_length"_s] = session->I2POutboundLength();
+    data[u"i2p_inbound_length_variance"_s] = session->I2PInboundLengthVariance();
+    data[u"i2p_outbound_length_variance"_s] = session->I2POutboundLengthVariance();
 
     // Proxy Server
     const auto *proxyManager = Net::ProxyConfigurationManager::instance();
@@ -434,6 +436,10 @@ void AppController::preferencesAction()
     data[u"ignore_ssl_errors"_s] = pref->isIgnoreSSLErrors();
     // Python executable path
     data[u"python_executable_path"_s] = pref->getPythonExecutablePath().toString();
+    // Start Session paused
+    data[u"start_paused"_s] = session->isStartPaused();
+    // Session shutdown timeout
+    data[u"shutdown_timeout"_s] = session->shutdownTimeout();
 
     // libtorrent preferences
     // Bdecode depth limit
@@ -767,6 +773,10 @@ void AppController::setPreferencesAction()
         session->setI2PInboundLength(it.value().toInt());
     if (hasKey(u"i2p_outbound_length"_s))
         session->setI2POutboundLength(it.value().toInt());
+    if (hasKey(u"i2p_inbound_length_variance"_s))
+        session->setI2PInboundLengthVariance(it.value().toInt());
+    if (hasKey(u"i2p_outbound_length_variance"_s))
+        session->setI2POutboundLengthVariance(it.value().toInt());
 
     // Proxy Server
     auto *proxyManager = Net::ProxyConfigurationManager::instance();
@@ -1094,6 +1104,18 @@ void AppController::setPreferencesAction()
     // Python executable path
     if (hasKey(u"python_executable_path"_s))
         pref->setPythonExecutablePath(Path(it.value().toString()));
+    // Start session paused
+    if (hasKey(u"start_paused"_s))
+        session->setStartPaused(it.value().toBool());
+    // Session shutdown timeout
+    if (hasKey(u"shutdown_timeout"_s))
+    {
+        // validate shutdown timeout, range -1 to INT_MAX
+        bool ok = false;
+        const int timeout = it.value().toInt(&ok);
+        if (ok && (timeout >= -1))
+            session->setShutdownTimeout(timeout);
+    }
 
     // libtorrent preferences
     // Bdecode depth limit
