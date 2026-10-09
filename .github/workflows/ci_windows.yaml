@@ -24,7 +24,6 @@ jobs:
             boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
-          - version: "RC_2_0"
         config:
         - os: windows-latest
           arch: x64
